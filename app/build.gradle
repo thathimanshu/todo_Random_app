@@ -7,7 +7,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.saini.alpha"
+        applicationId "com.saini.todoRandom"
         minSdk 28
         targetSdk 33
         versionCode 1
