@@ -1,6 +1,8 @@
 package com.saini.alpha;
 import android.content.SharedPreferences;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.widget.Button;
 import java.util.Random;
@@ -11,6 +13,7 @@ import android.view.View;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -23,10 +26,36 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imageButton2;
     private static final String SHARED_PREFS_KEY = "MyPrefs";
     private static final String ARRAYLIST_KEY = "ArrayListKey";
+
+    private static final String SELECTED_IMAGE_INDEX_KEY = "SelectedImageIndexKey";
+    private static final int DEFAULT_IMAGE_INDEX = -1;
     private static ArrayList<String> arr;
     public boolean isInt(char ch){
         int num = ch-'0';
         return num >= 0 && num < 10;
+    }
+    private Button button2;
+    private ImageView imageView2;
+    private int[] imageResources = {
+
+            R.drawable.t2,
+            R.drawable.t3,
+            R.drawable.t4,
+            R.drawable.t5,
+            R.drawable.t6,
+            R.drawable.t7
+    };
+
+    private void setRandomImage() {
+        Random random = new Random();
+        int randomIndex = random.nextInt(imageResources.length);
+        Drawable imageDrawable = getResources().getDrawable(imageResources[randomIndex]);
+        imageView2.setImageDrawable(imageDrawable);
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(SELECTED_IMAGE_INDEX_KEY, randomIndex);
+        editor.apply();
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +74,29 @@ public class MainActivity extends AppCompatActivity {
         editText.setEnabled(false);
         editText.setTextColor(Color.WHITE);
 
+        button2 = findViewById(R.id.button2);
+        imageView2 = findViewById(R.id.imageView2);
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setRandomImage();
+            }
+        });
+
+        SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS_KEY, MODE_PRIVATE);
+        int selectedImageIndex = sharedPreferences.getInt(SELECTED_IMAGE_INDEX_KEY, DEFAULT_IMAGE_INDEX);
+
+        if (selectedImageIndex == DEFAULT_IMAGE_INDEX) {
+            // Set the default image if the selected image index is not found in SharedPreferences
+            Drawable defaultImageDrawable = getResources().getDrawable(R.drawable.t4);
+            imageView2.setImageDrawable(defaultImageDrawable);
+        } else if (selectedImageIndex >= 0 && selectedImageIndex < imageResources.length) {
+            // Set the selected image if it exists in SharedPreferences
+            Drawable selectedImageDrawable = getResources().getDrawable(imageResources[selectedImageIndex]);
+            imageView2.setImageDrawable(selectedImageDrawable);
+        }
+
         fab.setOnClickListener(new View.OnClickListener() {
 
 
@@ -53,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
                 if (inputField.getVisibility() != View.VISIBLE) {
                     imageButton2.setVisibility(View.VISIBLE);
                     inputField.setVisibility(View.VISIBLE);
+                } else{
+                    inputField.setVisibility(View.GONE);
+                    imageButton2.setVisibility(View.GONE);
+
+
                 }
             }
         });
@@ -123,4 +180,5 @@ public class MainActivity extends AppCompatActivity {
         String str = Integer.toString(idx+1) +". "+ arr.get(idx);
         return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
+
 }
