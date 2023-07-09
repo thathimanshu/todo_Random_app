@@ -9,19 +9,25 @@ import android.graphics.Color;
 import java.util.ArrayList;
 import android.view.View;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import android.content.Context;
 
 public class MainActivity extends AppCompatActivity {
 
     private FloatingActionButton fab;
     private EditText inputField;
-
+    private ImageButton imageButton2;
     private static final String SHARED_PREFS_KEY = "MyPrefs";
     private static final String ARRAYLIST_KEY = "ArrayListKey";
     private static ArrayList<String> arr;
-
+    public boolean isInt(char ch){
+        int num = ch-'0';
+        return num >= 0 && num < 10;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         fab = findViewById(R.id.floatingActionButton);
         inputField = findViewById(R.id.inputField2);
+        imageButton2 = findViewById(R.id.imageButton2);
 
         EditText editText = findViewById(R.id.editTextText);
         editText.setText(idea());
@@ -40,40 +47,44 @@ public class MainActivity extends AppCompatActivity {
 
         fab.setOnClickListener(new View.OnClickListener() {
 
-            public boolean isInt(char ch){
-                int num = ch-'0';
-                return num >= 0 && num < 10;
-            }
+
             @Override
             public void onClick(View v) {
-                if (inputField.getVisibility() == View.VISIBLE) {
-
-                    String item = inputField.getText().toString().trim();
-                    if(!item.isEmpty()){
-                        if(isInt(item.charAt(0))){
-                            int num = 0;
-                            for(char ch:item.toCharArray()){
-                                num = num*10 + ch-'0';
-                            }
-                            arr.remove(num-1);
-                            Toast.makeText(MainActivity.this, "Item remove from list", Toast.LENGTH_SHORT).show();
-                        } else{
-                            arr.add(item);
-                            Toast.makeText(MainActivity.this, "Item added to list", Toast.LENGTH_SHORT).show();
-                        }
-                        saveArrayList(); // Save the ArrayList to SharedPreferences after changes
-
-                    }
-
-                    inputField.setVisibility(View.GONE);
-                    inputField.getText().clear();
-                } else {
-
+                if (inputField.getVisibility() != View.VISIBLE) {
+                    imageButton2.setVisibility(View.VISIBLE);
                     inputField.setVisibility(View.VISIBLE);
-
                 }
             }
         });
+        imageButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String item = inputField.getText().toString().trim();
+                imageButton2.setVisibility(View.GONE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(inputField.getWindowToken(), 0);
+                if(!item.isEmpty()){
+                    if(isInt(item.charAt(0))){
+                        int num = 0;
+                        for(char ch:item.toCharArray()){
+                            num = num*10 + ch-'0';
+                        }
+                        arr.remove(num-1);
+                        Toast.makeText(MainActivity.this, "Item remove from list", Toast.LENGTH_SHORT).show();
+                    } else{
+                        arr.add(item);
+                        Toast.makeText(MainActivity.this, "Item added to list", Toast.LENGTH_SHORT).show();
+                    }
+                    saveArrayList(); // Save the ArrayList to SharedPreferences after changes
+
+                }
+
+                inputField.setVisibility(View.GONE);
+                inputField.getText().clear();
+            }
+        });
+
+
 
         Button button = findViewById(R.id.button);
         button.setOnClickListener(v -> {
